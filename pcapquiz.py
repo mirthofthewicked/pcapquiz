@@ -45,7 +45,14 @@ def quiz(filename, hr):
           if hr == True:
               print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
           print hexdump(p[IP])
-          answer= raw_input("\nGiven the IP datagram, what is the decimal length?\n=>")
+          while True: #Checks for a valid number
+              try:
+                  answer= int(raw_input("\nGiven the IP datagram, what is the decimal length?\n=>"))
+              except:
+                      print("Please enter a valid number.")
+                      continue
+              else:      
+                      break
           if int(answer) == p[IP].len:
               print '\033[92m' + "CORRECT!" + '\033[0m'
               score=+1
