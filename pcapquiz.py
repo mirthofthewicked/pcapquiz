@@ -43,6 +43,7 @@ def quiz(filename, hr):
        if IP in p:
           # Question 1
           if hr == True:
+              print 'Score: ' + str(score)
               print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
           print hexdump(p[IP])
           while True: #Checks for a valid number
@@ -61,6 +62,7 @@ def quiz(filename, hr):
          
           # Question 2
           if hr == True:
+              print 'Score: ' + str(score)
               print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
           print hexdump(p[IP])
           answer = raw_input("\nWhich protocol is in use?\n=>")
@@ -72,6 +74,7 @@ def quiz(filename, hr):
 
           # Question 3
           if hr == True:
+              print 'Score: ' + str(score)
               print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
           print hexdump(p[IP])
           answer = raw_input("\nWhat is the destination IP?\n=>")
@@ -98,6 +101,7 @@ def quiz(filename, hr):
             #
           
           if hr == True:
+              print 'Score: ' + str(score)
               print '\033[95m' + "\n" + TCPTableHelp + "\n" + '\033[0m'
           print hexdump(p[TCP])
           while True: #Checks for a valid number
