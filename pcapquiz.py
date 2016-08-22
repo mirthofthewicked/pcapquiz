@@ -47,7 +47,7 @@ def quiz(filename, hr):
           print hexdump(p[IP])
           while True: #Checks for a valid number
               try:
-                  answer= int(raw_input("\nGiven the IP datagram, what is the decimal length?\n=>"))
+                  answer = int(raw_input("\nGiven the IP datagram, what is the decimal length?\n=>"))
               except:
                       print("Please enter a valid number.")
                       continue
@@ -100,7 +100,14 @@ def quiz(filename, hr):
           if hr == True:
               print '\033[95m' + "\n" + TCPTableHelp + "\n" + '\033[0m'
           print hexdump(p[TCP])
-          answer = raw_input("\nWhat is the TCP header length?\n=>")
+          while True: #Checks for a valid number
+              try:
+                  answer = int(raw_input("\nWhat is the TCP header length?\n=>"))
+              except:
+                      print("Please enter a valid number.")
+                      continue
+              else:      
+                      break
           if int(answer) == p[TCP].dataofs:
               print '\033[92m' + "CORRECT!" + '\033[0m'
               score=+1
