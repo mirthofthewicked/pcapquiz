@@ -5,7 +5,7 @@ import argparse
 
 def quiz(filename, hr):
     pcaps=rdpcap(filename)
-    
+
     # Add ICMP and DNS
     IPv4TableHelp ="""
         |   0   |   1   |   2   |   3   |
@@ -14,7 +14,8 @@ def quiz(filename, hr):
       8 |  TTL  | Proto |    Checksum   |
       12|        SOURCE ADDRESS         |
       16|     DESTINATION ADDRESS       |
-      20|            OPTIONS            |"""
+      20|            OPTIONS            |
+    """
 
     TCPTableHelp = """
         |   0   |   1   |   2   |   3   |
@@ -23,66 +24,88 @@ def quiz(filename, hr):
       8 |     Acknowledgement Number    |
       12| HL | R | Flag |  Window size  |
       16|   Checksum    | Urgent Pointer|
-      20|    OPTIONS (up to 40 bytes)   |"""
+      20|    OPTIONS (up to 40 bytes)   |
+    """
 
     UDPTableHelp = """
         |   0   |   1   |   2   |   3   |
       0 |  Source Port  |  Dest.  Port  |
-      4 |     Length    |    Checksum   |"""
+      4 |     Length    |    Checksum   |
+    """
 
     score=0
     # Questions to add to pool:
-    # 
+    #
     # Ethernet
     # What is the MTU set in the following output?
     # TCP
     # What is the value of the ECN flag?
     for p in pcaps:
 
-       # IP related questions
-       if IP in p:
-          # Question 1
-          if hr == True:
-              print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
-          print hexdump(p[IP])
-          while True: #Checks for a valid number
-              try:
-                  answer= int(raw_input("\nGiven the IP datagram, what is the decimal length?\n=>"))
-              except:
-                      print("Please enter a valid number.")
-                      continue
-              else:      
-                      break
-          if int(answer) == p[IP].len:
-              print '\033[92m' + "CORRECT!" + '\033[0m'
-              score=+1
-          else:
-              print '\033[91m' + "INCORRECT!" + '\033[0m'
-         
-          # Question 2
-          if hr == True:
-              print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
-          print hexdump(p[IP])
-          answer = raw_input("\nWhich protocol is in use?\n=>")
-          if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
-              print '\033[92m' + "CORRECT!" + '\033[0m'
-              score=+1
-          else:
-              print '\033[91m' + "INCORRECT!" + '\033[0m'
+    # IP related questions
+        if IP in p:
+            # Question 1   
+            if hr == True:
+                print 'Score: ' + str(score)
+                print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
+            print hexdump(p[IP])
+            while True: #Checks for a valid number
+                try:
+                    answer = int(raw_input("\nGiven the IP datagram, what is the decimal length?\n=>"))
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                except:
+                    print 'Please enter a valid number.'
+                    continue
+                else:
+                    break
+            if int(answer) == p[IP].len:
+                print '\033[92m' + "CORRECT!" + '\033[0m'
+                score=+1
+            else:
+                print '\033[91m' + "INCORRECT!" + '\033[0m'
 
-          # Question 3
-          if hr == True:
-              print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
-          print hexdump(p[IP])
-          answer = raw_input("\nWhat is the destination IP?\n=>")
-          if answer == p[IP].dst:
-              print '\033[92m' + "CORRECT!" + '\033[0m'
-              score=+1
-          else:
-              print '\033[91m' + "INCORRECT!" + '\033[0m'
+            # Question 2
+            if hr == True:
+                print 'Score: ' + str(score)
+                print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
+            print hexdump(p[IP])
+            while True:
+                try:
+                    answer = raw_input("\nWhich protocol is in use?\n=>")
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                else:
+                    break
+            if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
+                print '\033[92m' + "CORRECT!" + '\033[0m'
+                score=+1
+            else:
+                print '\033[91m' + "INCORRECT!" + '\033[0m'
+
+            # Question 3
+            if hr == True:
+                print 'Score: ' + str(score)
+                print '\033[95m' + "\n" + IPv4TableHelp + "\n" + '\033[0m'
+            print hexdump(p[IP])
+            while True:
+                try:
+                    answer = raw_input("\nWhat is the destination IP?\n=>")
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                else:
+                    break
+            if answer == p[IP].dst:
+                print '\033[92m' + "CORRECT!" + '\033[0m'
+                score=+1
+            else:
+                print '\033[91m' + "INCORRECT!" + '\033[0m'
 
         # TCP related questions
-       if TCP in p:
+        if TCP in p:
             # Question 1
             # Given the TCP output below, which flags are set?
             # This will get ugly:
@@ -96,16 +119,27 @@ def quiz(filename, hr):
             #     'E': 'ECE',
             #     'C': 'CWR',}
             #
-          
-          if hr == True:
-              print '\033[95m' + "\n" + TCPTableHelp + "\n" + '\033[0m'
-          print hexdump(p[TCP])
-          answer = raw_input("\nWhat is the TCP header length?\n=>")
-          if int(answer) == p[TCP].dataofs:
-              print '\033[92m' + "CORRECT!" + '\033[0m'
-              score=+1
-          else:
-              print '\033[91m' + "INCORRECT!" + '\033[0m'
+
+            if hr == True:
+                print 'Score: ' + str(score)
+                print '\033[95m' + "\n" + TCPTableHelp + "\n" + '\033[0m'
+            print hexdump(p[TCP])
+            while True: #Checks for a valid number
+                try:
+                    answer = int(raw_input("\nWhat is the TCP header length?\n=>"))
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                except:
+                    print 'Please enter a valid number.'
+                    continue
+                else:
+                    break
+            if int(answer) == p[TCP].dataofs:
+                print '\033[92m' + "CORRECT!" + '\033[0m'
+                score=+1
+            else:
+                print '\033[91m' + "INCORRECT!" + '\033[0m'
 
     # More questions to add...
     # What is the TCP header length?
@@ -124,7 +158,7 @@ def main():
     parser = argparse.ArgumentParser(
             description = 'Packet Analysis Study Quiz (TODO: better description)',
             formatter_class=parser_formatter)
-    
+
     parser.add_argument('--filename', required=True, action='store',
             dest='filename', help='pcap file used to quiz')
     #parser.add_argument('-n', required=False, action='store_false',
@@ -142,3 +176,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
