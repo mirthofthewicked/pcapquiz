@@ -35,7 +35,8 @@ def quiz(filename, hr):
       0 |   Destination MAC OUI | Dest  |
       4 | MAC UAA       |   Source MAC  |
       8 | OUI   |   Source MAC UAA      |
-      12|    LEN/SNAP   |"""
+      12|    LEN/SNAP   |
+    """
 
     IPv4TableHelp ="""
         |   0   |   1   |   2   |   3   |
@@ -80,8 +81,17 @@ def quiz(filename, hr):
       4 |    ICMP ID    | ICMP Sequence |
     """
 
-    score=0
-    qcount=1    
+    score=0         # Total Score
+    qcount=1        # Question Count
+    dscore = {      # Dictionary Score
+    'Datagram Length': 0,
+    'Protocol': 0,
+    'Destination IP': 0,
+    'TCP Flags': 0,
+    'TCP Header': 0,
+    'TCP Destination': 0,
+    'UDP Destination': 0
+	}     
 
     # Questions to add to pool:
     #
@@ -105,9 +115,10 @@ def quiz(filename, hr):
                 if answer == p[IP].len:
                     print green("CORRECT!")
                     score+=1
+                    dscore['Datagram Length'] += 1
                 else:
                     print red("INCORRECT! The correct answer is: ") + yellow("%d" % p[IP].len)
-
+                    dscore['Datagram Length'] -= 1
                 # Question 2
                 if hr == True:
                     reportscore(score, qcount)
@@ -118,8 +129,10 @@ def quiz(filename, hr):
                 if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
                     print green("CORRECT!")
                     score+=1
+                    dscore['Protocol'] += 1
                 else:
                     print red("INCORRECT! The correct answer is: %s" % ("TCP" if TCP in p else ("UDP" if UDP in p else ("ICMP" if ICMP in p else "NO IDEA"))))
+                    dscore['Protocol'] -= 1
 
                 # Question 3
                 if hr == True:
@@ -131,9 +144,10 @@ def quiz(filename, hr):
                 if answer == p[IP].dst:
                     print green("CORRECT!")
                     score+=1
+                    dscore['Destination IP'] += 1
                 else:
                     print red("INCORRECT! The correct answer is: %s" % yellow(p[IP].dst))
-
+                    dscore['Destination IP'] -= 1
 
             # TCP related questions
             if TCP in p:
@@ -154,8 +168,10 @@ def quiz(filename, hr):
                 if answer == tcpLayer.sprintf('%TCP.flags%').upper():
                     print green("CORRECT!")
                     score+=1
+                    dscore['TCP Flags'] += 1
                 else:
                     print red("INCORRECT! The correct answer is: ") + yellow(tcpLayer.sprintf('%TCP.flags%')) + red(" which is " + ", ".join([flags[x] for x in tcpLayer.sprintf('%TCP.flags%')]))
+                    dscore['TCP Flags'] -= 1
 
                 # Question 2
                 # Given the tcp header supplied, compute the TCP header length.
@@ -170,8 +186,10 @@ def quiz(filename, hr):
                 if answer == tcpLayer.dataofs * 4:
                     print green("CORRECT!")
                     score+=1
+                    dscore['TCP Header'] += 1
                 else:
                     print red("INCORRECT! The correct answer is %d." % tcpLayer.dataofs * 4)
+                    dscore['TCP Header'] -= 1
 
                 # Question 3
                 if hr == True:
@@ -184,8 +202,10 @@ def quiz(filename, hr):
                 if answer == tcpLayer.dport:
                     print green("CORRECT!")
                     score+=1
+                    dscore['TCP Destination'] += 1
                 else:
                     print red("INCORRECT! The correct answer is: ") + yellow(str(tcpLayer.dport))
+                    dscore['TCP Destination'] -= 1
 
                 # More questions to add...
                 # Is this a TCP fragment? What offseT?
@@ -205,13 +225,19 @@ def quiz(filename, hr):
                 if answer == p[UDP].dport:
                     print green("CORRECT!")
                     score+=1
+                    dscore['UDP Destination'] += 1
                 else:
                     print red("INCORRECT! The correct answer is: ") + yellow("%d" % p[UDP].dport)
+                    dscore['UDP Destination'] -= 1
 
     except KeyboardInterrupt:
         print yellow("\nFinal Score: %d. " % score)
         print yellow("Total questions: %d. " % qcount)
         print yellow("Overall Score: %d%%. " % ((score*100)/qcount))
+        print green("\n\nScore Breakdown:")         # Sorted by what subjects to work on
+        sorted_questions = sorted(dscore, key=dscore.__getitem__)
+        for q in sorted_questions:
+            print("{} : {}".format(q, dscore[q]))
         exit()
 
     except EOFError:
