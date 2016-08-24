@@ -3,7 +3,7 @@ import argparse
 from colors import *
 #from IPy import IP
 
-# At some point, add what the correct value is and why
+# At some point, add what the correct value is (DONE!!) and why *(LOL)*
 
 def quiz(filename, hr):
     pcaps=rdpcap(filename)
@@ -116,27 +116,48 @@ def quiz(filename, hr):
                     exit()
                 else:
                     break
-            if answer == p[IP].dst:
+            if str(answer) == str(p[IP].dst):
                 print green("CORRECT!")
                 score=+1
             else:
-                print red("INCORRECT! The correct answer is: ") + yellow(p[IP.dst])
+                print red("INCORRECT! The correct answer is: ") + yellow(str(p[IP].dst))
 
         # TCP related questions
         if TCP in p:
             # Question 1
             # Given the TCP output below, which flags are set?
-            # This will get ugly:
-            #   flags = {
-            #     'F': 'FIN',
-            #     'S': 'SYN',
-            #     'R': 'RST',
-            #     'P': 'PSH',
-            #     'A': 'ACK',
-            #     'U': 'URG',
-            #     'E': 'ECE',
-            #     'C': 'CWR',}
-            #
+            flags = {
+                'F': 'FIN',
+                'S': 'SYN',
+                'R': 'RST',
+                'P': 'PSH',
+                'A': 'ACK',
+                'U': 'URG',
+                'E': 'ECE',
+                'C': 'CWR'}
+            
+            if hr == True:
+                print 'Score: ' + str(score)
+                print magenta("\n" + TCPTableHelp + "\n")
+                print magenta("      Flags:  FSRPAUEC\n")
+            print hexdump(p[TCP])
+            while True: #Checks for a valid number
+                try:
+                    answer = str(raw_input("\nGiven the TCP datagram, which flags are set? (expecting just letters in order)\n=>"))
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                except:
+                    print 'Please enter a valid number.'
+                    continue
+                else:
+                    break
+
+            if answer == p[TCP].sprintf('%TCP.flags%'):
+                print green("CORRECT!")
+                score=+1
+            else:
+                print red("INCORRECT! The correct answer is: ") + yellow(str(p[TCP].sprintf('%TCP.flags%') + red(" which is " + str([flags[x] for x in p[TCP].sprintf('%TCP.flags%')]))))
 
             if hr == True:
                 print 'Score: ' + str(score)
@@ -162,12 +183,46 @@ def quiz(filename, hr):
     # More questions to add...
     # Are IP options enabled?
     # Are TCP options enabled?
-    # What is the TCP header length?
     # How much TCP data is in the following output (in bytes)?
-    # What is the destination port?
-    # UDP
-    # What is the destination port?
-    # ICMP
+            if hr == True:
+                print 'Score: ' + str(score)
+                print magenta("\n" + TCPTableHelp + "\n")
+            print hexdump(p[TCP])
+            while True:
+                try:
+                    answer = int(raw_input("\nWhat is the TCP destination port?\n=>"))
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                else:
+                    break
+            if int(answer) == p[TCP].dport:
+                print green("CORRECT!")
+                score=+1
+            else:
+                print red("INCORRECT! The correct answer is: ") + yellow(str(p[TCP].dport))
+
+        # UDP related questions
+        if UDP in p:
+            if hr == True:
+                print 'Score: ' + str(score)
+                print magenta("\n" + UDPTableHelp + "\n")
+            print hexdump(p[UDP])
+            while True:
+                try:
+                    answer = int(raw_input("\nWhat is the UDP destination port?\n=>"))
+                except KeyboardInterrupt:
+                    print '\n' + 'Final Score ' + str(score)
+                    exit()
+                else:
+                    break
+            if answer == p[UDP].dport:
+                print green("CORRECT!")
+                score=+1
+            else:
+                print red("INCORRECT! The correct answer is: ") + yellow(str(p[UDP].dport))
+
+# ICMP
     # What is the value of the ICMP identifier and ICMP secquence number?
     # Given the IPv4 ICMP packet, what is the ICMP type?
     # DNS
@@ -189,6 +244,8 @@ def main():
     parser.add_argument('--hr', required=False, action='store',
             dest='hr', default=True, help='Displays Header Reference for question')
     #Sometime add show Types (for like ICMP Echo Reply or whatever)
+    #Sometime add an option to choose IP, TCP, UDP, ICMP, DNS questions only
+    #Sometime add an option to use built in sample pcaps instead of supplying your own
 
     args = parser.parse_args()
 
