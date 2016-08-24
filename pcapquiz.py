@@ -3,10 +3,35 @@ import argparse
 from colors import *
 #from IPy import IP
 
+
+def requestIntegerInput(prompt):
+    while True: #Checks for a valid number
+        try:
+            answer = int(raw_input("\n%s\n=>" % prompt))
+            return answer
+        except KeyboardInterrupt:
+            raise
+        except EOFError:
+            raise
+        except:
+            print '\nPlease enter a valid number.'
+            continue
+        else:
+            break
+
+
+
 # At some point, add what the correct value is (DONE!!) and why *(LOL)*
 
 def quiz(filename, hr):
     pcaps=rdpcap(filename)
+
+    ethernetTableHelp = """
+        |   0   |   1   |   2   |   3   |
+      0 |   Destination MAC OUI | Dest  |
+      4 | MAC UAA       |   Source MAC  |
+      8 | OUI   |   Source MAC UAA      |
+      12|    LEN/SNAP   |"""
 
     IPv4TableHelp ="""
         |   0   |   1   |   2   |   3   |
@@ -52,175 +77,136 @@ def quiz(filename, hr):
     """
 
     score=0
+
     # Questions to add to pool:
     #
     # Ethernet
     # What is the MTU set in the following output?
     # TCP
     # What is the value of the ECN flag?
-    for p in pcaps:
+    try:
+        for p in pcaps:
 
-    # IP related questions
-        if IP in p:
-            # Question 1   
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + IPv4TableHelp + "\n")
-            print hexdump(p[IP])
-            while True: #Checks for a valid number
-                try:
-                    answer = int(raw_input("\nGiven the IP datagram, what is the decimal length?\n=>"))
-                except KeyboardInterrupt:
-                    print yellow('\n' + 'Final Score ' + str(score))
-                    exit()
-                except:
-                    print 'Please enter a valid number.'
-                    continue
+        # IP related questions
+            if IP in p:
+                # Question 1   
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + IPv4TableHelp + "\n")
+
+                print hexdump(p[IP])
+                answer = requestIntegerInput("Given the IP datagram, what is the decimal length?")
+                if answer == p[IP].len:
+                    print green("CORRECT!")
+                    score+=1
                 else:
-                    break
-            if int(answer) == p[IP].len:
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT! The correct answer is: ") + yellow(str(p[IP].len))
+                    print red("INCORRECT! The correct answer is: ") + yellow("%d" % p[IP].len)
 
-            # Question 2
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + IPv4TableHelp + "\n")
-            print hexdump(p[IP])
-            while True:
-                try:
-                    answer = raw_input("\nWhich protocol is in use?\n=>")
-                except KeyboardInterrupt:
-                    print yellow('\n' + 'Final Score ' + str(score))
-                    exit()
+                # Question 2
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + IPv4TableHelp + "\n")
+                print hexdump(p[IP])
+                answer = raw_input("\nWhich protocol is in use?\n=>").upper()
+                if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
+                    print green("CORRECT!")
+                    score+=1
                 else:
-                    break
-            if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT!")
+                    print red("INCORRECT! The correct answer is: %s" % ("TCP" if TCP in p else ("UDP" if UDP in p else ("ICMP" if ICMP in p else "NO IDEA"))))
 
-            # Question 3
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + IPv4TableHelp + "\n")
-            print hexdump(p[IP])
-            while True:
-                try:
-                    answer = raw_input("\nWhat is the destination IP?\n=>")
-                except KeyboardInterrupt:
-                    print '\n' + 'Final Score ' + str(score)
-                    exit()
+                # Question 3
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + IPv4TableHelp + "\n")
+                print hexdump(p[IP])
+                answer = raw_input("\nWhat is the destination IP?\n=>")
+                if answer == p[IP].dst:
+                    print green("CORRECT!")
+                    score+=1
                 else:
-                    break
-            if str(answer) == str(p[IP].dst):
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT! The correct answer is: ") + yellow(str(p[IP].dst))
+                    print red("INCORRECT! The correct answer is: %s" % yellow(p[IP].dst))
 
-        # TCP related questions
-        if TCP in p:
-            # Question 1
-            # Given the TCP output below, which flags are set?
-            flags = {
-                'F': 'FIN',
-                'S': 'SYN',
-                'R': 'RST',
-                'P': 'PSH',
-                'A': 'ACK',
-                'U': 'URG',
-                'E': 'ECE',
-                'C': 'CWR'}
-            
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + TCPTableHelp + "\n")
-                print magenta("      Flags:  FSRPAUEC\n")
-            print hexdump(p[TCP])
-            while True: #Checks for a valid number
-                try:
-                    answer = str(raw_input("\nGiven the TCP datagram, which flags are set? (expecting just letters in order)\n=>"))
-                except KeyboardInterrupt:
-                    print '\n' + 'Final Score ' + str(score)
-                    exit()
-                except:
-                    print 'Please enter a valid number.'
-                    continue
+
+            # TCP related questions
+            if TCP in p:
+                tcpLayer = p[TCP]
+
+                # Question 1
+                # Given the TCP output below, which flags are set?
+                flags = { 'F': 'FIN', 'S': 'SYN', 'R': 'RST', 'P': 'PSH', 'A': 'ACK', 'U': 'URG', 'E': 'ECE', 'C': 'CWR'}
+                
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + TCPTableHelp + "\n")
+                    print magenta("      Flags:  FSRPAUEC\n")
+
+                print hexdump(tcpLayer)
+
+                answer = raw_input("\nGiven the TCP datagram, which flags are set? (expecting just letters in order)\n=>").upper()
+                if answer == tcpLayer.sprintf('%TCP.flags%').upper():
+                    print green("CORRECT!")
+                    score+=1
                 else:
-                    break
+                    print red("INCORRECT! The correct answer is: ") + yellow(tcpLayer.sprintf('%TCP.flags%')) + red(" which is " + ", ".join([flags[x] for x in tcpLayer.sprintf('%TCP.flags%')]))
 
-            if answer == p[TCP].sprintf('%TCP.flags%'):
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT! The correct answer is: ") + yellow(str(p[TCP].sprintf('%TCP.flags%') + red(" which is " + str([flags[x] for x in p[TCP].sprintf('%TCP.flags%')]))))
+                # Question 2
+                # Given the tcp header supplied, compute the TCP header length.
 
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + TCPTableHelp + "\n")
-            print hexdump(p[TCP])
-            while True: #Checks for a valid number
-                try:
-                    answer = int(raw_input("\nWhat is the TCP header length?\n=>"))
-                except KeyboardInterrupt:
-                    print '\n' + 'Final Score ' + str(score)
-                    exit()
-                except:
-                    print 'Please enter a valid number.'
-                    continue
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + TCPTableHelp + "\n")
+
+                print hexdump(tcpLayer)
+                answer = requestIntegerInput("What is the TCP header length?")
+                if answer == tcpLayer.dataofs * 4:
+                    print green("CORRECT!")
+                    score+=1
                 else:
-                    break
-            if int(answer) == p[TCP].dataofs:
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT!")
+                    print red("INCORRECT! The correct answer is %d." % tcpLayer.dataofs * 4)
 
-    # More questions to add...
-    # Are IP options enabled?
-    # Are TCP options enabled?
-    # How much TCP data is in the following output (in bytes)?
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + TCPTableHelp + "\n")
-            print hexdump(p[TCP])
-            while True:
-                try:
-                    answer = int(raw_input("\nWhat is the TCP destination port?\n=>"))
-                except KeyboardInterrupt:
-                    print '\n' + 'Final Score ' + str(score)
-                    exit()
-                else:
-                    break
-            if int(answer) == p[TCP].dport:
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT! The correct answer is: ") + yellow(str(p[TCP].dport))
+                # Question 3
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + TCPTableHelp + "\n")
 
-        # UDP related questions
-        if UDP in p:
-            if hr == True:
-                print 'Score: ' + str(score)
-                print magenta("\n" + UDPTableHelp + "\n")
-            print hexdump(p[UDP])
-            while True:
-                try:
-                    answer = int(raw_input("\nWhat is the UDP destination port?\n=>"))
-                except KeyboardInterrupt:
-                    print '\n' + 'Final Score ' + str(score)
-                    exit()
+                print hexdump(tcpLayer)
+                answer = requestIntegerInput("What is the TCP Destination port?")
+                if answer == tcpLayer.dport:
+                    print green("CORRECT!")
+                    score+=1
                 else:
-                    break
-            if answer == p[UDP].dport:
-                print green("CORRECT!")
-                score=+1
-            else:
-                print red("INCORRECT! The correct answer is: ") + yellow(str(p[UDP].dport))
+                    print red("INCORRECT! The correct answer is: ") + yellow(str(tcpLayer.dport))
+
+                # More questions to add...
+                # Is this a TCP fragment? What offseT?
+                # Are IP options enabled?
+                # Are TCP options enabled?
+                # How much TCP data is in the following output (in bytes)?
+
+            # UDP related questions
+            if UDP in p:
+                if hr == True:
+                    print "Score: %d" % score
+                    print magenta("\n" + UDPTableHelp + "\n")
+
+                print hexdump(p[UDP])
+                answer = requestIntegerInput("What is the UDP destination port?") 
+
+                if answer == p[UDP].dport:
+                    print green("CORRECT!")
+                    score+=1
+                else:
+                    print red("INCORRECT! The correct answer is: ") + yellow("%d" % p[UDP].dport)
+
+    except KeyboardInterrupt:
+        print yellow("\nFinal Score %d. " % score)
+        exit()
+
+    except EOFError:
+        print yellow("\nFinal Score %d. " % score)
+        exit()
+
+
 
 # ICMP
     # What is the value of the ICMP identifier and ICMP secquence number?
