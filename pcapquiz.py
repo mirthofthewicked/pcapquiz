@@ -244,6 +244,10 @@ def quiz(filename, hr):
         print yellow("\nFinal Score: %d. " % score)
         print yellow("Total questions: %d. " % qcount)
         print yellow("Overall Score: %d%%. " % ((score*100)/qcount))
+        print green("\n\nScore Breakdown:")         # Sorted by what subjects to work on
+        sorted_questions = sorted(dscore, key=dscore.__getitem__)
+        for q in sorted_questions:
+            print("{} : {}".format(q, dscore[q]))
         exit()
 
 
