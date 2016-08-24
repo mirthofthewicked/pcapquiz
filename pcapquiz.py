@@ -19,6 +19,10 @@ def requestIntegerInput(prompt):
         else:
             break
 
+def reportscore(score, qcount):
+    print "\nScore: %d" % score
+    print "Question Number: %d" % qcount
+    print "Current Score: %d%%. " % ((score*100)/qcount)
 
 
 # At some point, add what the correct value is (DONE!!) and why *(LOL)*
@@ -77,6 +81,7 @@ def quiz(filename, hr):
     """
 
     score=0
+    qcount=1    
 
     # Questions to add to pool:
     #
@@ -91,11 +96,12 @@ def quiz(filename, hr):
             if IP in p:
                 # Question 1   
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + IPv4TableHelp + "\n")
 
                 print hexdump(p[IP])
                 answer = requestIntegerInput("Given the IP datagram, what is the decimal length?")
+                qcount+=1
                 if answer == p[IP].len:
                     print green("CORRECT!")
                     score+=1
@@ -104,10 +110,11 @@ def quiz(filename, hr):
 
                 # Question 2
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + IPv4TableHelp + "\n")
                 print hexdump(p[IP])
                 answer = raw_input("\nWhich protocol is in use?\n=>").upper()
+                qcount+=1
                 if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
                     print green("CORRECT!")
                     score+=1
@@ -116,10 +123,11 @@ def quiz(filename, hr):
 
                 # Question 3
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + IPv4TableHelp + "\n")
                 print hexdump(p[IP])
                 answer = raw_input("\nWhat is the destination IP?\n=>")
+                qcount+=1
                 if answer == p[IP].dst:
                     print green("CORRECT!")
                     score+=1
@@ -136,13 +144,13 @@ def quiz(filename, hr):
                 flags = { 'F': 'FIN', 'S': 'SYN', 'R': 'RST', 'P': 'PSH', 'A': 'ACK', 'U': 'URG', 'E': 'ECE', 'C': 'CWR'}
                 
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + TCPTableHelp + "\n")
                     print magenta("      Flags:  FSRPAUEC\n")
 
                 print hexdump(tcpLayer)
-
                 answer = raw_input("\nGiven the TCP datagram, which flags are set? (expecting just letters in order)\n=>").upper()
+                qcount+=1
                 if answer == tcpLayer.sprintf('%TCP.flags%').upper():
                     print green("CORRECT!")
                     score+=1
@@ -153,11 +161,12 @@ def quiz(filename, hr):
                 # Given the tcp header supplied, compute the TCP header length.
 
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + TCPTableHelp + "\n")
 
                 print hexdump(tcpLayer)
                 answer = requestIntegerInput("What is the TCP header length?")
+                qcount+=1
                 if answer == tcpLayer.dataofs * 4:
                     print green("CORRECT!")
                     score+=1
@@ -166,11 +175,12 @@ def quiz(filename, hr):
 
                 # Question 3
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + TCPTableHelp + "\n")
 
                 print hexdump(tcpLayer)
                 answer = requestIntegerInput("What is the TCP Destination port?")
+                qcount+=1
                 if answer == tcpLayer.dport:
                     print green("CORRECT!")
                     score+=1
@@ -186,12 +196,12 @@ def quiz(filename, hr):
             # UDP related questions
             if UDP in p:
                 if hr == True:
-                    print "Score: %d" % score
+                    reportscore(score, qcount)
                     print magenta("\n" + UDPTableHelp + "\n")
 
                 print hexdump(p[UDP])
                 answer = requestIntegerInput("What is the UDP destination port?") 
-
+                qcount+=1
                 if answer == p[UDP].dport:
                     print green("CORRECT!")
                     score+=1
@@ -199,20 +209,22 @@ def quiz(filename, hr):
                     print red("INCORRECT! The correct answer is: ") + yellow("%d" % p[UDP].dport)
 
     except KeyboardInterrupt:
-        print yellow("\nFinal Score %d. " % score)
+        print yellow("\nFinal Score: %d. " % score)
+        print yellow("Total questions: %d. " % qcount)
+        print yellow("Overall Score: %d%%. " % ((score*100)/qcount))
         exit()
 
     except EOFError:
-        print yellow("\nFinal Score %d. " % score)
+        print yellow("\nFinal Score: %d. " % score)
+        print yellow("Total questions: %d. " % qcount)
+        print yellow("Overall Score: %d%%. " % ((score*100)/qcount))
         exit()
-
 
 
 # ICMP
     # What is the value of the ICMP identifier and ICMP secquence number?
     # Given the IPv4 ICMP packet, what is the ICMP type?
     # DNS
-
 
 
 def main():
@@ -239,4 +251,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
