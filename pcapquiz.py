@@ -119,6 +119,7 @@ def quiz(filename, hr):
                 else:
                     print red("INCORRECT! The correct answer is: ") + yellow("%d" % p[IP].len)
                     dscore['Datagram Length'] -= 1
+
                 # Question 2
                 if hr == True:
                     reportscore(score, qcount)
@@ -175,7 +176,6 @@ def quiz(filename, hr):
 
                 # Question 2
                 # Given the tcp header supplied, compute the TCP header length.
-
                 if hr == True:
                     reportscore(score, qcount)
                     print magenta("\n" + TCPTableHelp + "\n")
@@ -231,8 +231,9 @@ def quiz(filename, hr):
                     dscore['UDP Destination'] -= 1
 
     except KeyboardInterrupt:
+        qcount -= 1
         print yellow("\nFinal Score: %d. " % score)
-        print yellow("Total questions: %d. " % qcount)
+        print yellow("Total Questions: %d. " % qcount)
         print yellow("Overall Score: %d%%. " % ((score*100)/qcount))
         print green("\n\nScore Breakdown:")         # Sorted by what subjects to work on
         sorted_questions = sorted(dscore, key=dscore.__getitem__)
@@ -241,13 +242,14 @@ def quiz(filename, hr):
         exit()
 
     except EOFError:
+        qcount -= 1
         print yellow("\nFinal Score: %d. " % score)
-        print yellow("Total questions: %d. " % qcount)
+        print yellow("Total Questions: %d. " % qcount)
         print yellow("Overall Score: %d%%. " % ((score*100)/qcount))
         print green("\n\nScore Breakdown:")         # Sorted by what subjects to work on
         sorted_questions = sorted(dscore, key=dscore.__getitem__)
         for q in sorted_questions:
-            print("{} : {}".format(q, dscore[q]))
+            print ("{} : {}".format(q, dscore[q]))
         exit()
 
 
