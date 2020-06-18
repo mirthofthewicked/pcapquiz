@@ -127,7 +127,7 @@ def quiz(filename, hr):
                 print hexdump(p[IP])
                 answer = raw_input("\nWhich protocol is in use?\n=>").upper()
                 qcount+=1
-                if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS"):
+                if (TCP in p and answer == "TCP") or (UDP in p and answer == "UDP") or (ICMP in p and answer == "ICMP") or (DNS in p and answer == "DNS") or (IP in p and answer == "IP"):
                     print green("CORRECT!")
                     score+=1
                     dscore['Protocol'] += 1
